@@ -1,0 +1,82 @@
+<!-- templates/activation_failed.html -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác thực thất bại</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            background-color: #fff;
+            padding: 50px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .container:hover {
+            transform: translateY(-10px); /* Hiệu ứng nổi nhẹ khi di chuột */
+        }
+        h1 {
+            color: #dc3545;
+            font-size: 2.8rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2rem;
+            color: #495057;
+            margin-bottom: 35px;
+        }
+        .btn-primary, .btn-secondary {
+            font-size: 1.1rem;
+            padding: 12px 25px;
+            border-radius: 50px;
+            margin: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border: none;
+            color: #fff;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        a {
+            color: #fff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Xác thực thất bại!</h1>
+        <p>Đường dẫn xác thực không hợp lệ hoặc tài khoản đã được xác thực trước đó.</p>
+        <a href="/signup" class="btn btn-secondary">Đăng ký lại</a>
+        <a href="/loginn" class="btn btn-primary">Đăng nhập</a>
+    </div>
+</body>
+</html>

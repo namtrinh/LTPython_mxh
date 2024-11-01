@@ -1,0 +1,72 @@
+<!-- templates/activation_success.html -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác thực thành công</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+            height: 100vh; /* Chiều cao toàn bộ màn hình */
+            display: flex; /* Sử dụng Flexbox */
+            justify-content: center; /* Căn giữa theo chiều ngang */
+            align-items: center; /* Căn giữa theo chiều dọc */
+            margin: 0; /* Loại bỏ margin mặc định */
+        }
+        .container {
+            max-width: 600px;
+            background-color: white;
+            border-radius: 15px; /* Bo tròn góc nhiều hơn */
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center; /* Căn giữa toàn bộ nội dung */
+        }
+        h1 {
+            color: #28a745; /* Màu xanh lá cây */
+            font-size: 2.5rem; /* Kích thước chữ lớn hơn */
+            margin-bottom: 20px; /* Khoảng cách dưới tiêu đề */
+        }
+        p {
+            font-size: 1.2rem; /* Kích thước chữ lớn hơn */
+            color: #555;
+            margin-bottom: 30px; /* Khoảng cách dưới đoạn văn */
+        }
+        .btn-primary {
+            background-color: #007bff; /* Màu xanh dương */
+            border-color: #007bff;
+            color: #ffffff; /* Màu chữ trắng */
+            padding: 10px 20px; /* Điều chỉnh kích thước nút */
+            font-size: 1.1rem; /* Kích thước chữ lớn hơn */
+        }
+        .btn-primary:hover {
+            background-color: #0056b3; /* Màu xanh dương tối hơn khi hover */
+            border-color: #0056b3;
+        }
+        .btn-outline-secondary {
+            font-size: 1.1rem; /* Kích thước chữ lớn hơn */
+            color: #6c757d; /* Màu chữ mặc định */
+            border-color: #6c757d; /* Màu viền nút */
+        }
+        .btn-outline-secondary:hover {
+            color: #ffffff; /* Màu chữ trắng khi hover */
+            background-color: #6c757d; /* Màu nền khi hover */
+        }
+        hr {
+            margin: 20px 0; /* Khoảng cách cho đường ngăn */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="display-4">🎉 Xác thực tài khoản thành công!</h1>
+        <p class="lead">Cảm ơn bạn đã xác thực tài khoản của mình. Bây giờ bạn có thể đăng nhập vào trang web.</p>
+        <a href="/loginn" class="btn btn-primary btn-lg">Đăng nhập</a>
+        <hr class="my-4">
+        <p>Bạn có thể quay lại trang chính hoặc liên hệ với chúng tôi nếu cần hỗ trợ.</p>
+        <a href="/" class="btn btn-outline-secondary">Về trang chính</a>
+    </div>
+</body>
+</html>
