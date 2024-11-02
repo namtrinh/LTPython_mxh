@@ -67,8 +67,9 @@ class Followers(models.Model):
 #tao Model comment de luu binh luanj 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE) 
     text = models.TextField()
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

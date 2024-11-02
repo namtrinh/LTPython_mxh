@@ -176,14 +176,20 @@ def likes(request, id):
     
 @login_required(login_url='/loginn')
 def comment(request, id):
-    if request.method =='POST':
+    if request.method == 'POST':
         post = get_object_or_404(Post, id=id)
+        
+        # Lấy Profile của người dùng hiện tại
+        profile = get_object_or_404(Profile, user=request.user)
+        
         text = request.POST.get('text')
         
-        Comment.objects.create(post=post, user=request.user, text=text, created_at=timezone.now())       
+        # Tạo đối tượng Comment
+        Comment.objects.create(post=post, user=request.user, profile=profile, text=text, created_at=timezone.now())
+         
         return redirect('/#' + str(post.id))
     else:
-        return HttpResponse(status=405) 
+        return HttpResponse(status=405)
     
 
 

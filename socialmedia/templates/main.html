@@ -211,6 +211,7 @@
                                             <!-- Display Existing Comments -->
                                             {% for comment in pos.comments.all %}
                                                 <div class="comment">
+                                                    <a href="/profile/{{comment.user.username}}"><img src="{{comment.profile.profileimg.url}}" alt="Profile Picture" class="profile-pic" style="width: 30px; height: 30px; border-radius: 50%;"></a>
                                                     <p><strong>{{ comment.user.username }}</strong>: {{ comment.text }}</p>
                                                     <p class="text-muted">{{ comment.created_at }}</p>
                                                 </div>
