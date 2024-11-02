@@ -18,5 +18,6 @@ urlpatterns = [
     path('search-results/', views.search_results, name='search_results'),
     path('follow', views.follow, name='follow'),
     path('activate/<str:token>/', views.activate_account, name='activate'),
+    path('comment/<str:id>/', views.comment, name='comment'),
 
 ]
