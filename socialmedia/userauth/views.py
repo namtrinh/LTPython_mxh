@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
-from .models import Comment
+from .models import Comment, Block
 from django.utils import timezone
 
 from .models import Followers, LikePost, Post, Profile, CustomUser
@@ -206,9 +206,13 @@ def explore(request):
     return render(request, 'explore.html',context)
 
 @login_required(login_url='/loginn')
-def profile(request,id_user):
-    user_object = CustomUser.objects.get(username=id_user)
-    print(user_object)
+def profile(request, id_user):
+    user_object = get_object_or_404(CustomUser, username=id_user)
+
+    # Kiểm tra xem người dùng hiện tại có bị chặn bởi người dùng đang xem hồ sơ không
+    if Block.objects.filter(blocked=request.user, blocker=user_object).exists():
+        return render(request, 'block_error.html', {'message': "Bạn không thể xem hồ sơ của người dùng này."})
+
     profile = Profile.objects.get(user=request.user)
     user_profile = Profile.objects.get(user=user_object)
     user_posts = Post.objects.filter(user=id_user).order_by('-created_at')
@@ -217,10 +221,14 @@ def profile(request,id_user):
     follower = request.user.username
     user = id_user
 
+    # Kiểm tra nếu đã theo dõi hay chưa
     if Followers.objects.filter(follower=follower, user=user).first():
         follow_unfollow = 'Unfollow'
     else:
         follow_unfollow = 'Follow'
+
+    # Kiểm tra nếu đã chặn hay chưa
+    is_blocked = Block.objects.filter(blocker=request.user, blocked=user_object).exists()
 
     user_followers = len(Followers.objects.filter(user=id_user))
     user_following = len(Followers.objects.filter(follower=id_user))
@@ -231,37 +239,35 @@ def profile(request,id_user):
         'user_posts': user_posts,
         'user_post_length': user_post_length,
         'profile': profile,
-        'follow_unfollow':follow_unfollow,
+        'follow_unfollow': follow_unfollow,
+        'is_blocked': is_blocked,  # Thêm biến này vào context
         'user_followers': user_followers,
         'user_following': user_following,
     }
 
-
     if request.user.username == id_user:
         if request.method == 'POST':
-            if request.FILES.get('image') == None:
-             image = user_profile.profileimg
-             bio = request.POST['bio']
-             location = request.POST['location']
+            if request.FILES.get('image') is None:
+                image = user_profile.profileimg
+                bio = request.POST['bio']
+                location = request.POST['location']
 
-             user_profile.profileimg = image
-             user_profile.bio = bio
-             user_profile.location = location
-             user_profile.save()
-            if request.FILES.get('image') != None:
-             image = request.FILES.get('image')
-             bio = request.POST['bio']
-             location = request.POST['location']
+                user_profile.profileimg = image
+                user_profile.bio = bio
+                user_profile.location = location
+                user_profile.save()
+            else:
+                image = request.FILES.get('image')
+                bio = request.POST['bio']
+                location = request.POST['location']
 
-             user_profile.profileimg = image
-             user_profile.bio = bio
-             user_profile.location = location
-             user_profile.save()
+                user_profile.profileimg = image
+                user_profile.bio = bio
+                user_profile.location = location
+                user_profile.save()
 
+            return redirect('/profile/' + id_user)
 
-            return redirect('/profile/'+id_user)
-        else:
-            return render(request, 'profile.html', context)
     return render(request, 'profile.html', context)
 
 @login_required(login_url='/loginn')
@@ -275,8 +281,22 @@ def delete(request, id):
 @login_required(login_url='/loginn')
 def search_results(request):
     query = request.GET.get('q')
+    current_user = request.user
 
+    # Lấy danh sách các người đã chặn current_user
+    blocked_by_users = Block.objects.filter(blocked=current_user).values_list('blocker__username', flat=True)
+
+    # Tìm kiếm người dùng
     users = Profile.objects.filter(user__username__icontains=query)
+
+    # Nếu current_user bị chặn, loại bỏ những người đã chặn current_user khỏi kết quả tìm kiếm
+    if blocked_by_users.exists():
+        users = users.exclude(user__username__in=blocked_by_users)
+
+    # Nếu current_user không bị chặn, cho phép tìm kiếm tất cả
+    # Không cần kiểm tra lại ở đây vì đã lọc ở trên
+    # users = Profile.objects.filter(user__username__icontains=query)
+
     posts = Post.objects.filter(caption__icontains=query)
 
     context = {
@@ -285,6 +305,7 @@ def search_results(request):
         'posts': posts,
     }
     return render(request, 'search_user.html', context)
+
 
 def home_post(request,id):
     post=Post.objects.get(id=id)
@@ -312,3 +333,41 @@ def follow(request):
             return redirect('/profile/'+user)
     else:
         return redirect('/')
+
+
+def block_user(request, user_id):
+    if request.method == 'POST':
+        user_to_block = get_object_or_404(CustomUser, id=user_id)
+        print(user_id)
+
+        # Hủy theo dõi từ phía người chặn
+        Followers.objects.filter(follower=request.user.username, user=user_to_block.username).delete()
+
+        # Hủy theo dõi từ phía người bị chặn (nếu có)
+        Followers.objects.filter(follower=user_to_block.username, user=request.user.username).delete()
+
+        # Chặn người dùng
+        block_instance, created = Block.objects.get_or_create(blocker=request.user, blocked=user_to_block)
+
+        if created:
+            # Người dùng đã được chặn thành công
+            return redirect('profile', id_user=user_to_block.username)
+        else:
+            # Người dùng đã được chặn trước đó
+            return redirect('profile', id_user=user_to_block.username)
+
+    return redirect('/')
+
+@login_required(login_url='/loginn')
+def unblock_user(request, user_id):
+    user_to_unblock = get_object_or_404(CustomUser, id=user_id)
+
+    if request.method == 'POST':
+        # Tìm bản ghi chặn
+        block_instance = Block.objects.filter(blocker=request.user, blocked=user_to_unblock).first()
+
+        if block_instance:
+            block_instance.delete()  # Xóa bản ghi chặn
+            return redirect('/profile/' + user_to_unblock.username)
+
+    return render(request, 'error.html', {'message': "Bạn không thể bỏ chặn người dùng này."})

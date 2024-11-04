@@ -73,4 +73,18 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.text[:20]}" 
+        return f"{self.user.username} - {self.text[:20]}"
+
+
+class Block(models.Model):
+    blocker = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="blocking")
+    blocked = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="blocked")
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('blocker', 'blocked')
+
+    def __str__(self):
+        return f"{self.blocker.email} blocked {self.blocked.email}"
+
+        return f"{self.user.username} - {self.text[:20]}"

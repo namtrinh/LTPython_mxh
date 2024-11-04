@@ -163,6 +163,27 @@
                             <div class="card">
                                 <div class="rounded-top text-white d-flex flex-row"
                                      style="background:black; height:200px;">
+                                
+                                  {% if user != user_profile.user %}
+                                        <div style="position: absolute; right: 20px; top: 20px; font-size: 24px; color: white;">
+                                    
+                                            <form action="
+                                                    {% if is_blocked %}{% url 'unblock_user' user_profile.user.id %}{% else %}{% url 'block_user' user_profile.user.id %}{% endif %}"
+                                                  method="POST" style="display:inline;">
+                                                {% csrf_token %}
+                                                <button type="submit"
+                                                        style="background: none; border: none; color: white; font-size: inherit; cursor: pointer;">
+                                                    {% if is_blocked %}  <!-- Kiểm tra nếu đã chặn -->
+                                                        <i class="fa-solid fa-user-slash"></i> Bỏ chặn
+                                                    {% else %}
+                                                        <i class="fa-solid fa-ban"></i> Chặn
+                                                    {% endif %}
+                                                </button>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                
+                                
                                     <div class="ms-4  d-flex flex-column" style="width: 150px; margin-top:5rem;">
                                         <img src="{{ user_profile.profileimg.url }}" alt="Generic placeholder image"
                                              class="img-fluid img-thumbnail mt-4 mb-2"
