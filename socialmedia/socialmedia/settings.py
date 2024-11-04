@@ -63,7 +63,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mxh',
         'USER': 'root',
-        'PASSWORD': '12345678',
+        'PASSWORD': '',
         'HOST': 'localhost',
     }
 }
@@ -97,7 +97,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Ho_Chi_Minh'
+USE_TZ = True 
 
 USE_I18N = True
 
