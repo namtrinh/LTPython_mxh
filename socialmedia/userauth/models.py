@@ -21,6 +21,12 @@ class CustomUser(AbstractBaseUser):
     def __str__(self):
         return self.email
 
+    def followers_count(self):
+        return self.followers.count()  # Số người theo dõi
+
+    def following_count(self):
+        return self.following.count()  # Số người mà người dùng đang theo dõi
+
 
 # Sử dụng CustomUser trong Profile
 class Profile(models.Model):
@@ -88,3 +94,13 @@ class Block(models.Model):
         return f"{self.blocker.email} blocked {self.blocked.email}"
 
         return f"{self.user.username} - {self.text[:20]}"
+
+class Follower(models.Model):
+    user = models.ForeignKey(CustomUser, related_name='following', on_delete=models.CASCADE)  # Người theo dõi
+    follower = models.ForeignKey(CustomUser, related_name='followers', on_delete=models.CASCADE)  # Người được theo dõi
+
+    class Meta:
+        unique_together = ('user', 'follower')  # Đảm bảo rằng mỗi user chỉ theo dõi một follower một lần
+
+    def __str__(self):
+        return f"{self.follower.email} follows {self.user.email}"
