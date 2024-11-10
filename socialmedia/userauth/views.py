@@ -15,7 +15,7 @@ from .models import Followers, LikePost, Post, Profile, CustomUser
 from django.db.models import Q
 
 from django.contrib.auth.models import User
-
+from .models import Post, LikePost
 
 def signup(request):
     try:
@@ -371,3 +371,44 @@ def unblock_user(request, user_id):
             return redirect('/profile/' + user_to_unblock.username)
 
     return render(request, 'error.html', {'message': "Bạn không thể bỏ chặn người dùng này."})
+
+@login_required(login_url='/login')
+def likes(request, id):
+    if request.method == 'GET':
+        username = request.user.username
+        post = get_object_or_404(Post, id=id)
+
+        like_filter = LikePost.objects.filter(post_id=id, username=username).first()
+
+        if like_filter is None:
+            new_like = LikePost.objects.create(post_id=id, username=username)
+            post.no_of_likes = post.no_of_likes + 1
+        else:
+            like_filter.delete()
+            post.no_of_likes = post.no_of_likes - 1
+
+        post.save()
+
+        return redirect('/#'+str(id))
+
+# views.py
+from django.shortcuts import render
+from .models import Post, LikePost
+
+
+@login_required(login_url='/loginn')
+def like_list(request, post_id):
+    post = Post.objects.get(id=post_id)
+    liked_users = LikePost.objects.filter(post_id=post.id)
+
+    # Lấy thông tin người dùng đã thích bài viết
+    liked_user_profiles = []
+    for like in liked_users:
+        user = CustomUser.objects.get(username=like.username)  # Lấy đối tượng người dùng
+        profile = Profile.objects.get(user=user)  # Lấy profile của người dùng
+        liked_user_profiles.append({
+            'username': user.username,
+            'profile_img': profile.profileimg.url if profile.profileimg else '/static/default_avatar.jpg'  # Đảm bảo có ảnh mặc định
+        })
+
+    return render(request, 'like_list.html', {'post': post, 'liked_user_profiles': liked_user_profiles})
