@@ -12,7 +12,7 @@ urlpatterns = [
     path('upload', views.upload),
     path('like-post/<str:id>', views.likes, name='like-post'),
     path('#<str:id>', views.home_post),
-    path('explore', views.explore),
+    path('explore/', views.explore),
     path('profile/<str:id_user>', views.profile, name='profile'),
     path('delete/<str:id>', views.delete),
     path('search-results/', views.search_results, name='search_results'),
@@ -21,5 +21,6 @@ urlpatterns = [
     path('comment/<str:id>/', views.comment, name='comment'),
     path('block/<str:user_id>/', views.block_user, name='block_user'),
     path('unblock/<str:user_id>/', views.unblock_user, name='unblock_user'),
-
-]
+    path('like/<int:id>/', views.likes, name='likes'),
+    path('like-list/<uuid:post_id>/', views.like_list, name='like_list'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
