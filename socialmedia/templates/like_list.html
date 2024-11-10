@@ -1,0 +1,110 @@
+<div class="modal-header text-center">
+  <h5 class="modal-title w-100" id="likeListModalLabel">Danh sách người đã like</h5>
+</div>
+<div class="modal-body text-center">
+  <p class="text-muted mb-4">Dưới đây là danh sách những người đã like bài viết này.</p>
+  <ul class="list-unstyled">
+      {% for user in liked_user_profiles %}
+          <li class="user-item d-flex justify-content-center align-items-center py-3 mb-3">
+              <a href="{% url 'profile' id_user=user.username %}" class="username d-flex align-items-center text-decoration-none text-dark">
+                  <img src="{{ user.profile_img }}" alt="Profile Picture" class="user-profile-pic me-3">
+                  <span class="fw-bold">@{{ user.username }}</span>
+              </a>
+          </li>
+      {% empty %}
+          <p class="text-center text-muted">Chưa có ai like bài viết này.</p>
+      {% endfor %}
+  </ul>
+</div>
+
+<!-- CSS Tích hợp trực tiếp trong file HTML -->
+<style>
+    /* Cải thiện giao diện của modal */
+    .modal-header {
+        background-color: #4CAF50;  /* Xanh lá mát mắt */
+        color: white;
+        border-bottom: 2px solid #388E3C;  /* Màu xanh lá đậm để tạo điểm nhấn */
+        text-align: center;
+    }
+
+    .modal-body {
+        background-color: #f1f8e9;  /* Nền sáng dễ nhìn */
+        color: #333;
+        text-align: center;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin: 0;
+    }
+
+    .text-muted {
+        font-size: 16px;
+    }
+
+    .user-item {
+        background-color: #ffffff;
+        border-radius: 12px;
+        padding: 12px 20px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .user-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .user-profile-pic {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border: 2px solid #4CAF50;
+        border-radius: 50%;
+    }
+
+    .username {
+        font-size: 18px;
+        font-weight: bold;
+        color: #388E3C;
+        text-transform: capitalize;
+    }
+
+    .fw-bold {
+        font-weight: 600;
+    }
+
+    /* Tạo kiểu cho trường hợp không có người like */
+    .modal-body p.text-center {
+        font-size: 16px;
+        color: #FF7043; /* Màu cam dễ chịu cho thông báo */
+    }
+
+    /* Đảm bảo modal có padding đủ để không bị dính vào các cạnh */
+    .modal-body {
+        padding: 20px;
+    }
+
+    /* Cải thiện header */
+    .modal-header h5 {
+        font-size: 1.8rem;
+    }
+
+    /* Tăng khoảng cách giữa các mục */
+    .user-item + .user-item {
+        margin-top: 10px;
+    }
+
+    /* Căn giữa mọi thứ */
+    .modal-body ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    /* Đảm bảo tiêu đề căn giữa trong modal-header */
+    .modal-header h5 {
+        margin: 0 auto;
+        text-align: center;
+    }
+</style>
