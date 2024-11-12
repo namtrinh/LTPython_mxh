@@ -1,9 +1,11 @@
 import uuid
 from itertools import chain
+
+from django.contrib import messages
 from django.core.cache import cache
 from django.core.mail import send_mail
 from  django . shortcuts  import  get_object_or_404, render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -11,7 +13,7 @@ from django.urls import reverse
 from .models import Comment, Block
 from django.utils import timezone
 
-from .models import Followers, LikePost, Post, Profile, CustomUser
+from .models import Follower, Followers, LikePost, Post, Profile, CustomUser
 from django.db.models import Q
 
 from django.contrib.auth.models import User
@@ -207,7 +209,7 @@ def explore(request):
 
 @login_required(login_url='/loginn')
 def profile(request, id_user):
-    user_object = get_object_or_404(CustomUser, username=id_user)
+    """ user_object = get_object_or_404(CustomUser, username=id_user)
 
     # Kiểm tra xem người dùng hiện tại có bị chặn bởi người dùng đang xem hồ sơ không
     if Block.objects.filter(blocked=request.user, blocker=user_object).exists():
@@ -268,7 +270,64 @@ def profile(request, id_user):
 
             return redirect('/profile/' + id_user)
 
-    return render(request, 'profile.html', context)
+    return render(request, 'profile.html', context) """
+
+    try:
+        user_object = CustomUser.objects.get(username=id_user)
+        profile = Profile.objects.get(user=user_object)
+        user_profile = Profile.objects.get(user=user_object)
+        user_posts = Post.objects.filter(user=id_user).order_by('-created_at')
+        user_post_length = len(user_posts)
+        
+        # người dùng hiện tại
+        follower = CustomUser.objects.get(username=request.user.username)
+        
+        # Kiểm tra xem người dùng hiện tại có đang theo dõi người dùng này không
+        if Follower.objects.filter(follower=follower, user=user_object).exists():
+            follow_unfollow = 'Unfollow'
+        else:
+            follow_unfollow = 'Follow'
+
+        user_follower = Follower.objects.filter(user=user_object)  # Lấy tất cả người theo dõi
+        user_followers_count = user_follower.count()  # Số lượng người theo dõi
+        user_following_count = Follower.objects.filter(follower=user_object).count()  # Số lượng người mà người dùng này đang theo dõi
+
+        print(user_followers_count)
+        print(user_followers_count)
+
+        context = {
+            'user_object': user_object,
+            'user_profile': user_profile,
+            'user_posts': user_posts,
+            'user_post_length': user_post_length,
+            'profile': profile,
+            'follow_unfollow': follow_unfollow,
+            'user_followers': user_follower,  # Truyền danh sách followers vào context
+            'user_followers_count': user_followers_count,
+            'user_following_count': user_following_count,
+            'profile_id': profile.user.id
+        }
+
+        if request.user.username == id_user:
+            if request.method == 'POST':
+                # Cập nhật hồ sơ
+                image = request.FILES.get('image', user_profile.profileimg)  # Sử dụng ảnh hiện tại nếu không có ảnh mới
+                bio = request.POST['bio']
+                location = request.POST['location'] 
+                user_profile.profileimg = image
+                user_profile.bio = bio
+                user_profile.location = location
+                user_profile.save()
+
+                return redirect('/profile/'+id_user)
+            else:
+                return render(request, 'profile.html', context)
+        
+        return render(request, 'profile.html', context)
+
+    except Exception as ex:
+        print(ex)
+        return HttpResponse("Lỗi rồi")
 
 @login_required(login_url='/loginn')
 def delete(request, id):
@@ -319,7 +378,7 @@ def home_post(request,id):
 
 
 def follow(request):
-    if request.method == 'POST':
+    """ if request.method == 'POST':
         follower = request.POST['follower']
         user = request.POST['user']
 
@@ -332,7 +391,46 @@ def follow(request):
             new_follower.save()
             return redirect('/profile/'+user)
     else:
+        return redirect('/') """
+    
+    if request.method == 'POST':
+        follower = CustomUser.objects.get(username=request.POST['follower'])
+        user = CustomUser.objects.get(username=request.POST['user'])
+
+        if Follower.objects.filter(follower=follower, user=user).first():
+            delete_follower = Follower.objects.get(follower=follower, user=user)
+            delete_follower.delete()
+            return redirect('/profile/' + user.username)
+        else:
+            new_follower = Follower.objects.create(follower=follower, user=user)
+            new_follower.save()
+            return redirect('/profile/' + user.username)
+    else:
         return redirect('/')
+
+@login_required(login_url='/login')
+def followers_list(request, id_user):
+    user_object = CustomUser.objects.get(id=id_user)
+    followers = Follower.objects.filter(user=user_object).select_related('follower')
+
+    context = {
+        'user_object': user_object,
+        'followers': followers
+    }
+
+    return render(request, 'followers_list.html', context)
+
+@login_required(login_url='/login')
+def following_list(request, id_user):
+    user_object = CustomUser.objects.get(id=id_user)
+    following = Follower.objects.filter(follower=user_object).select_related('user')
+    
+    context = {
+        'user_object': user_object,
+        'following': following,
+    }
+    
+    return render(request, 'following_list.html', context)
 
 
 def block_user(request, user_id):
@@ -371,3 +469,14 @@ def unblock_user(request, user_id):
             return redirect('/profile/' + user_to_unblock.username)
 
     return render(request, 'error.html', {'message': "Bạn không thể bỏ chặn người dùng này."})
+
+
+def report_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    # Tăng số lượng báo cáo
+    post.no_of_reports += 1
+    post.save()
+
+    # Redirect về trang chủ hoặc trang bài viết
+    return redirect('/')
