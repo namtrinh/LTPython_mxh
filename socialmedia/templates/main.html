@@ -175,16 +175,23 @@
                 {% include "modal.html" %}
                 {% include "search.html" %}
 
-                <div>{% for pos in post %}
-                    <div class="container" id="{{pos.id}}">
-                        <div class="row">
-                            <div class="col-md-6 mx-auto">
-                                <div class="post-card">
-                                    <img src="{{pos.image.url}}" alt="Post Image" class="post-image">
-                                    <div class="post-content">
-                                        <h5><a href="/profile/{{pos.user}}">@{{pos.user}}</a></h5>
-                                        <p>{{pos.caption}}</p>
-                                        <p class="text-muted">{{pos.created_at}}</p>
+                {% for pos in post %}
+                <div class="container" id="{{ pos.id }}">
+                    <div class="row">
+                        <div class="col-md-6 mx-auto">
+                            <div class="post-card">
+                                {% if pos.image %}
+                                    <img src="{{ pos.image.url }}" alt="Post Image" class="post-image">
+                                {% elif pos.video %}
+                                    <video controls class="post-video" style="width: 100%; height: auto; max-width: 100%; border-radius: 10px;">
+                                        <source src="{{ pos.video.url }}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                {% endif %}
+                                <div class="post-content">
+                                    <h5><a href="/profile/{{ pos.user }}">@{{ pos.user }}</a></h5>
+                                    <p>{{ pos.caption }}</p>
+                                    <p class="text-muted">{{ pos.created_at }}</p>
                                         <hr>
                                         <div class="like-section">
                                             <a href="/like-post/{{pos.id}}" class="btn btn-outline-primary">
