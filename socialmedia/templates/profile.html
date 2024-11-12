@@ -231,12 +231,23 @@
                                             <p class="small text-muted mb-0">Photos</p>
                                         </div>
                                         <div class="px-3">
-                                            <p class="mb-1 h5">{{ user_followers }}</p>
+                                            {% comment %} <p class="mb-1 h5">{{ user_followers }}</p>
                                             <p class="small text-muted mb-0">Followers</p>
+                                             {% endcomment %}
+                                            <a href="{% url 'followers_list' profile_id %}" style="text-decoration: none; color: inherit">
+                                                <p class="mb-1 h5">{{ user_followers_count }}</p>
+                                                <p class="small text-muted mb-0">Followers</p>
+                                            </a>
+
                                         </div>
                                         <div>
-                                            <p class="mb-1 h5">{{ user_following }}</p>
-                                            <p class="small text-muted mb-0">Following</p>
+                                            {% comment %} <p class="mb-1 h5">{{ user_following }}</p>
+                                            <p class="small text-muted mb-0">Following</p> {% endcomment %}
+
+                                            <a href="{% url 'following_list' profile_id %}" style="text-decoration: none; color: inherit">
+                                                <p class="mb-1 h5">{{ user_following_count }}</p>
+                                                <p class="small text-muted mb-0">Following</p>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
