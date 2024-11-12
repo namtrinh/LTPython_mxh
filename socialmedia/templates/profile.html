@@ -256,23 +256,22 @@
                                     <div class="image-grid">
                                         {% for pos in user_posts %}
                                             <div class="card image-item">
-                                                <img src="{{ pos.image.url }}" class="card-img-top" alt="..."
-                                                     style="width: 219px;height: 219px;">
-
+                                                {% if pos.image %}
+                                                    <img src="{{ pos.image.url }}" class="card-img-top" alt="Post Image" style="width: 219px;height: 219px;">
+                                                {% else %}
+                                                    <div class="no-image" style="width: 219px;height: 219px; background-color: #f0f0f0; display: flex; justify-content: center; align-items: center;">
+                                                        <span>No Image</span>
+                                                    </div>
+                                                {% endif %}
                                                 <div class="card-body">
                                                     <h5 class="card-title">{{ pos.caption }}</h5>
                                                     {% if user == user_profile.user %}
-                                                        <a href=" /delete/{{ pos.id }} "><i
-                                                                class="fa-solid fa-trash"></i></a>
-
-
+                                                        <a href=" /delete/{{ pos.id }} "><i class="fa-solid fa-trash"></i></a>
                                                     {% endif %}
                                                 </div>
                                             </div>
-
-
                                         {% endfor %}
-                                    </div>
+                                    </div>                                    
 
 
                                 </div>
