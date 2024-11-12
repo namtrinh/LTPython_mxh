@@ -10,8 +10,8 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from .models import Comment, Block
 from django.utils import timezone
-
-from .models import Followers, LikePost, Post, Profile, CustomUser
+from django.contrib import messages
+from .models import Followers, LikePost, Post, Profile, CustomUser, SavedPost
 from django.db.models import Q
 
 from django.contrib.auth.models import User
@@ -217,10 +217,9 @@ def profile(request, id_user):
     user_profile = Profile.objects.get(user=user_object)
     user_posts = Post.objects.filter(user=id_user).order_by('-created_at')
     user_post_length = len(user_posts)
-
     follower = request.user.username
     user = id_user
-
+    post_saved_db = SavedPost.objects.filter(user = request.user)
     # Kiểm tra nếu đã theo dõi hay chưa
     if Followers.objects.filter(follower=follower, user=user).first():
         follow_unfollow = 'Unfollow'
@@ -243,6 +242,7 @@ def profile(request, id_user):
         'is_blocked': is_blocked,  # Thêm biến này vào context
         'user_followers': user_followers,
         'user_following': user_following,
+        'post_saved_db':post_saved_db,
     }
 
     if request.user.username == id_user:
@@ -371,3 +371,26 @@ def unblock_user(request, user_id):
             return redirect('/profile/' + user_to_unblock.username)
 
     return render(request, 'error.html', {'message': "Bạn không thể bỏ chặn người dùng này."})
+
+@login_required(login_url='/loginn')
+def save_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id) 
+    user = request.user
+
+    # Prevent users from saving their own posts
+    if post.user is not request.user:
+        saved_post, created = SavedPost.objects.get_or_create(user=user, post=post)
+
+        if created:
+            messages.success(request, "Post saved successfully!")  
+        else:
+            messages.info(request, "You have already saved this post.")  
+    else:
+        messages.warning(request, "You cannot save your own post.")  
+        return redirect('/') 
+
+    return redirect('/')
+
+
+
+    

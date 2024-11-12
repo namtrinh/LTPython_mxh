@@ -182,19 +182,24 @@
                                 <div class="post-card">
                                     <img src="{{pos.image.url}}" alt="Post Image" class="post-image">
                                     <div class="post-content">
+                                        
                                         <h5><a href="/profile/{{pos.user}}">@{{pos.user}}</a></h5>
                                         <p>{{pos.caption}}</p>
                                         <p class="text-muted">{{pos.created_at}}</p>
+                                        <a href="{% url 'save_post' pos.id %}">Save Post</a>
                                         <hr>
+                                        
                                         <div class="like-section">
                                             <a href="/like-post/{{pos.id}}" class="btn btn-outline-primary">
                                                 <i class="fa-solid fa-thumbs-up"></i> Like
                                             </a>
+                                            
                                             <a href="#" class="btn btn-outline-secondary ml-2 toggle-comment" data-target="#comment-section-{{ pos.id }}">
                                                 <img src="{% static 'chat.png' %}" alt="Comment Icon" style="width: 20px; height: 20px; margin-right: 5px;"> Comment 
                                                 <p>&nbsp;</p>
                                                 <span class="comment-count" id="comment-count-{{ pos.id }}">{{ pos.comments.count }}</span> 
                                             </a>
+                                            
                                             <div>
                                                 {% if pos.no_of_likes == 0 %}
                                                 <p>0 Likes</p>

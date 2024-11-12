@@ -269,9 +269,24 @@
                                                     {% endif %}
                                                 </div>
                                             </div>
-
-
                                         {% endfor %}
+                                        <div class="card mt-4">
+                                            <div class="card-header">
+                                                <h4>Saved Posts</h4>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="image-grid">
+                                                    {% for savepost in post_saved_db %}
+                                                        <div class="card image-item">
+                                                            <img src="{{ savepost.post.image.url }}" alt="Saved Post" class="card-img-top" style="width: 100%; height: auto;">
+                                                            <div class="card-body">
+                                                                <p class="card-text">{{ savepost.post.caption }}</p>
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
 

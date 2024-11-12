@@ -21,5 +21,5 @@ urlpatterns = [
     path('comment/<str:id>/', views.comment, name='comment'),
     path('block/<str:user_id>/', views.block_user, name='block_user'),
     path('unblock/<str:user_id>/', views.unblock_user, name='unblock_user'),
-
+    path('save_post/<uuid:post_id>/', views.save_post, name='save_post'),
 ]

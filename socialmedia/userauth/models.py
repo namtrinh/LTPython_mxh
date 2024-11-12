@@ -88,3 +88,14 @@ class Block(models.Model):
         return f"{self.blocker.email} blocked {self.blocked.email}"
 
         return f"{self.user.username} - {self.text[:20]}"
+
+class SavedPost(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    saved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'post')  
+
+    def __str__(self):
+        return f"{self.user.username} saved {self.post.caption[:20]}"
