@@ -28,7 +28,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return self.following.count()  # Số người mà người dùng đang theo dõi
 
 
-# Sử dụng CustomUser trong Profile
+
 class Profile(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)  # Sửa tên CustomerUser thành CustomUser
     id_user = models.AutoField(primary_key=True)  # Sử dụng AutoField để tự động tăng
@@ -37,6 +37,7 @@ class Profile(models.Model):
     location = models.CharField(max_length=100, blank=True, default='')
     activation_token = models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=False)
+
 
     def __str__(self):
         return self.user.username
@@ -111,3 +112,15 @@ class Follower(models.Model):
 
     def __str__(self):
         return f"{self.follower.email} follows {self.user.email}"
+
+class SavedPost(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    saved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'post')
+
+    def __str__(self):
+        return f"{self.user.username} saved {self.post.caption[:20]}"
+

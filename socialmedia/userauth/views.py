@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
-from .models import Comment, Block
+from .models import Comment, Block, SavedPost
 from django.utils import timezone
 
 from .models import Follower, Followers, LikePost, Post, Profile, CustomUser
@@ -119,24 +119,35 @@ def logoutt(request):
     return redirect('/loginn')
 
 
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from .models import Post, Profile, Followers
+
 
 @login_required(login_url='/loginn')
 def home(request):
+    # Get the logged-in user instance
+    current_user = request.user
 
-    following_users = Followers.objects.filter(follower=request.user.username).values_list('user', flat=True)
+    # Get users that the logged-in user follows
+    following_users = Follower.objects.filter(follower=current_user).values_list('user__username', flat=True)
 
+    # Get users who follow the logged-in user
+    followers = Follower.objects.filter(user=current_user).values_list('follower__username', flat=True)
 
-    post = Post.objects.filter(Q(user=request.user.username) | Q(user__in=following_users)).order_by('-created_at')
+    # Combine posts from the logged-in user, users they follow, and users who follow them
+    post = Post.objects.filter(
+        Q(user=current_user.username) | Q(user__in=following_users) | Q(user__in=followers)
+    ).order_by('-created_at')
 
-    profile = Profile.objects.get(user=request.user)
+    # Get the logged-in user's profile
+    profile = Profile.objects.get(user=current_user)
 
     context = {
         'post': post,
         'profile': profile,
     }
-    return render(request, 'main.html',context)
-
-
+    return render(request, 'main.html', context)
 
 @login_required(login_url='/loginn')
 def upload(request):
@@ -175,24 +186,24 @@ def likes(request, id):
 
         # Redirect back to the post's detail page
         return redirect('/#'+id)
-    
+
 @login_required(login_url='/loginn')
 def comment(request, id):
     if request.method == 'POST':
         post = get_object_or_404(Post, id=id)
-        
+
         # Lấy Profile của người dùng hiện tại
         profile = get_object_or_404(Profile, user=request.user)
-        
+
         text = request.POST.get('text')
-        
+
         # Tạo đối tượng Comment
         Comment.objects.create(post=post, user=request.user, profile=profile, text=text, created_at=timezone.now())
-         
+
         return redirect('/#' + str(post.id))
     else:
         return HttpResponse(status=405)
-    
+
 
 
 @login_required(login_url='/loginn')
@@ -278,10 +289,11 @@ def profile(request, id_user):
         user_profile = Profile.objects.get(user=user_object)
         user_posts = Post.objects.filter(user=id_user).order_by('-created_at')
         user_post_length = len(user_posts)
-        
+        post_saved_db = SavedPost.objects.filter(user=request.user)
+
         # người dùng hiện tại
         follower = CustomUser.objects.get(username=request.user.username)
-        
+
         # Kiểm tra xem người dùng hiện tại có đang theo dõi người dùng này không
         if Follower.objects.filter(follower=follower, user=user_object).exists():
             follow_unfollow = 'Unfollow'
@@ -305,7 +317,9 @@ def profile(request, id_user):
             'user_followers': user_follower,  # Truyền danh sách followers vào context
             'user_followers_count': user_followers_count,
             'user_following_count': user_following_count,
-            'profile_id': profile.user.id
+            'profile_id': profile.user.id,
+            'post_saved_db': post_saved_db,
+
         }
 
         if request.user.username == id_user:
@@ -313,7 +327,7 @@ def profile(request, id_user):
                 # Cập nhật hồ sơ
                 image = request.FILES.get('image', user_profile.profileimg)  # Sử dụng ảnh hiện tại nếu không có ảnh mới
                 bio = request.POST['bio']
-                location = request.POST['location'] 
+                location = request.POST['location']
                 user_profile.profileimg = image
                 user_profile.bio = bio
                 user_profile.location = location
@@ -322,7 +336,7 @@ def profile(request, id_user):
                 return redirect('/profile/'+id_user)
             else:
                 return render(request, 'profile.html', context)
-        
+
         return render(request, 'profile.html', context)
 
     except Exception as ex:
@@ -392,7 +406,7 @@ def follow(request):
             return redirect('/profile/'+user)
     else:
         return redirect('/') """
-    
+
     if request.method == 'POST':
         follower = CustomUser.objects.get(username=request.POST['follower'])
         user = CustomUser.objects.get(username=request.POST['user'])
@@ -424,12 +438,12 @@ def followers_list(request, id_user):
 def following_list(request, id_user):
     user_object = CustomUser.objects.get(id=id_user)
     following = Follower.objects.filter(follower=user_object).select_related('user')
-    
+
     context = {
         'user_object': user_object,
         'following': following,
     }
-    
+
     return render(request, 'following_list.html', context)
 
 
@@ -479,4 +493,24 @@ def report_post(request, post_id):
     post.save()
 
     # Redirect về trang chủ hoặc trang bài viết
+    return redirect('/')
+
+
+@login_required(login_url='/loginn')
+def save_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    user = request.user
+
+    # Prevent users from saving their own posts
+    if post.user is not request.user:
+        saved_post, created = SavedPost.objects.get_or_create(user=user, post=post)
+
+        if created:
+            messages.success(request, "Post saved successfully!")
+        else:
+            messages.info(request, "You have already saved this post.")
+    else:
+        messages.warning(request, "You cannot save your own post.")
+        return redirect('/')
+
     return redirect('/')

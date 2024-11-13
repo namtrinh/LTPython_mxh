@@ -213,34 +213,35 @@
                                 <!-- Three dots button -->
 
                                 <!-- Report -->
-                              <div class="post-options">
-    <!-- Report option -->
-    <form method="POST" action="{% url 'report_post' pos.id %}" id="reportForm{{ pos.id }}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-link">
-            <i class="fa fa-ellipsis-v"></i> Report
-        </button>
-    </form>
-</div>
+                                <div class="post-options">
+                                    <!-- Report option -->
+                                    <form method="POST" action="{% url 'report_post' pos.id %}"
+                                          id="reportForm{{ pos.id }}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-link">
+                                            <i class="fa fa-ellipsis-v"></i> Report
+                                        </button>
+                                    </form>
+                                </div>
 
-<!-- JavaScript to show an alert on report -->
-<script type="text/javascript">
-    // Lắng nghe sự kiện khi form báo cáo được gửi đi
-    document.getElementById('reportForm{{ pos.id }}').addEventListener('submit', function (event) {
-        // Hiển thị thông báo khi form được gửi đi
-        event.preventDefault();  // Ngừng hành động submit mặc định
-        alert("The post has been reported!");
+                                <!-- JavaScript to show an alert on report -->
+                                <script type="text/javascript">
+                                    // Lắng nghe sự kiện khi form báo cáo được gửi đi
+                                    document.getElementById('reportForm{{ pos.id }}').addEventListener('submit', function (event) {
+                                        // Hiển thị thông báo khi form được gửi đi
+                                        event.preventDefault();  // Ngừng hành động submit mặc định
+                                        alert("The post has been reported!");
 
-        // Gửi form đi sau khi hiển thị alert
-        this.submit(); 
-    });
-</script>
-
-
+                                        // Gửi form đi sau khi hiển thị alert
+                                        this.submit();
+                                    });
+                                </script>
+                            
                                 <div class="post-content">
                                     <h5><a href="/profile/{{ pos.user }}">@{{ pos.user }}</a></h5>
                                     <p>{{ pos.caption }}</p>
                                     <p class="text-muted">{{ pos.created_at }}</p>
+                                    <a href="{% url 'save_post' pos.id %}">Save Post</a>
                                 </div>
                                 <img src="{{ pos.image.url }}" alt="Post Image" class="post-image">
                                 <div class="post-content">
@@ -304,6 +305,8 @@
                     </div>
                 </div>
             {% endfor %}
+
+
             </div>
         </main>
 
