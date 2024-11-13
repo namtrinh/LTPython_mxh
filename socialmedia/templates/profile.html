@@ -267,21 +267,22 @@
                                     <div class="image-grid">
                                         {% for pos in user_posts %}
                                             <div class="card image-item">
-                                                <img src="{{ pos.image.url }}" class="card-img-top" alt="..."
-                                                     style="width: 219px;height: 219px;">
-
+                                                <!--click vào hình ảnh sẽ trả về trang home--> 
+                                                <a href="/" style="text-decoration: none;">
+                                                    <img src="{{ pos.image.url }}" class="card-img-top" alt="..."
+                                                         style="width: 219px; height: 219px;">
+                                                </a>
+                                    
                                                 <div class="card-body">
-                                                    <h5 class="card-title">{{ pos.caption }}</h5>
+                                                    <!--click vào caption sẽ trả về trang home--> 
+                                                    <a href="/" style="text-decoration: none; color: inherit;">
+                                                        <h5 class="card-title">{{ pos.caption }}</h5>
+                                                    </a>
                                                     {% if user == user_profile.user %}
-                                                        <a href=" /delete/{{ pos.id }} "><i
-                                                                class="fa-solid fa-trash"></i></a>
-
-
+                                                        <a href="/delete/{{ pos.id }}"><i class="fa-solid fa-trash"></i></a>
                                                     {% endif %}
                                                 </div>
                                             </div>
-
-
                                         {% endfor %}
                                     </div>
 
