@@ -164,10 +164,12 @@
                                 <div class="rounded-top text-white d-flex flex-row"
                                      style="background:black; height:200px;">
 
+
                                     {% if user != user_profile.user %}
                                         <div style="position: absolute; right: 20px; top: 20px; font-size: 24px; color: white;">
 
                                             <form action="
+                                                    
                                                     
                                                     {% if is_blocked %}{% url 'unblock_user' user_profile.user.id %}{% else %}{% url 'block_user' user_profile.user.id %}{% endif %}"
                                                   method="POST" style="display:inline;">
@@ -183,7 +185,6 @@
                                             </form>
                                         </div>
                                     {% endif %}
-
 
                                     <div class="ms-4  d-flex flex-column" style="width: 150px; margin-top:5rem;">
                                         <img src="{{ user_profile.profileimg.url }}" alt="Generic placeholder image"
@@ -235,22 +236,25 @@
                                             {% comment %} <p class="mb-1 h5">{{ user_followers }}</p>
                                             <p class="small text-muted mb-0">Followers</p>
                                              {% endcomment %}
-                                            <a href="{% url 'followers_list' profile_id %}"
-                                               style="text-decoration: none; color: inherit">
-                                                <p class="mb-1 h5">{{ user_followers_count }}</p>
-                                                <p class="small text-muted mb-0">Followers</p>
-                                            </a>
+
+                                            {% if user == user_profile.user %}      <a
+                                                    href="{% url 'followers_list' profile_id %}"
+                                                    style="text-decoration: none; color: inherit">  {% endif %}
+                                            <p class="mb-1 h5">{{ user_followers_count }}</p>
+                                            <p class="small text-muted mb-0">Followers</p>
+                                            {% if user == user_profile.user %}          </a> {% endif %}
 
                                         </div>
                                         <div>
                                             {% comment %} <p class="mb-1 h5">{{ user_following }}</p>
                                             <p class="small text-muted mb-0">Following</p> {% endcomment %}
 
-                                            <a href="{% url 'following_list' profile_id %}"
-                                               style="text-decoration: none; color: inherit">
-                                                <p class="mb-1 h5">{{ user_following_count }}</p>
-                                                <p class="small text-muted mb-0">Following</p>
-                                            </a>
+                                            {% if user == user_profile.user %}
+                                                <a href="{% url 'following_list' profile_id %}"
+                                                   style="text-decoration: none; color: inherit">  {% endif %}
+                                            <p class="mb-1 h5">{{ user_following_count }}</p>
+                                            <p class="small text-muted mb-0">Following</p>
+                                            {% if user == user_profile.user %}          </a> {% endif %}
                                         </div>
                                     </div>
                                 </div>
@@ -270,14 +274,26 @@
                                     <div class="image-grid">
                                         {% for pos in user_posts %}
                                             <div class="card image-item">
-                                                <!--click vào hình ảnh sẽ trả về trang home--> 
+                                                <!--click vào hình ảnh sẽ trả về trang home-->
                                                 <a href="/" style="text-decoration: none;">
-                                                    <img src="{{ pos.image.url }}" class="card-img-top" alt="..."
-                                                         style="width: 219px; height: 219px;">
+
+
+                                                    {% if pos.image %}
+                                                        <img src="{{ pos.image.url }}" class="card-img-top" alt="..."
+                                                             style="width: 219px; height: 219px;">
+                                                    {% elif pos.video %}
+                                                        <video controls
+                                                               class="card-img-top" alt="..."
+                                                               style="width: 219px; height: 219px;">
+                                                            <source src="{{ pos.video.url }}" type="video/mp4">
+                                                            Your browser does not support the video tag.
+                                                        </video>
+                                                    {% endif %}
+
                                                 </a>
-                                    
+
                                                 <div class="card-body">
-                                                    <!--click vào caption sẽ trả về trang home--> 
+                                                    <!--click vào caption sẽ trả về trang home-->
                                                     <a href="/" style="text-decoration: none; color: inherit;">
                                                         <h5 class="card-title">{{ pos.caption }}</h5>
                                                     </a>
@@ -296,12 +312,15 @@
                                                 <div class="image-grid">
                                                     {% for savepost in post_saved_db %}
                                                         <div class="card image-item">
-                                                            <img src="{{ savepost.post.image.url }}" alt="Saved Post"
-                                                                 class="card-img-top"
-                                                                 style="width: 100%; height: auto;">
-                                                            <div class="card-body">
-                                                                <p class="card-text">{{ savepost.post.caption }}</p>
-                                                            </div>
+                                                            {% if savepost.post.image %}
+                                                                <img src="{{ savepost.post.image.url }}"
+                                                                     alt="Saved Post"
+                                                                     class="card-img-top"
+                                                                     style="width: 100%; height: auto;">
+                                                                <div class="card-body">
+                                                                    <p class="card-text">{{ savepost.post.caption }}</p>
+                                                                </div>
+                                                            {% endif %}
                                                         </div>
                                                     {% endfor %}
                                                 </div>

@@ -38,7 +38,7 @@ class PostAdmin(admin.ModelAdmin):
                 send_mail(
                     'Your Post Has Been Deleted',
                     f'Your post "{obj.caption}" has been deleted because it received too many reports.',
-                    'your-email@example.com',  # Thay bằng email của bạn
+                    'cunnconn01@gmail.com',  # Thay bằng email của bạn
                     [user_email],  # Gửi email tới người dùng
                     fail_silently=False,
                 )

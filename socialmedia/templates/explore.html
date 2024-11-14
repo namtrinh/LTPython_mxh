@@ -205,10 +205,21 @@
                         {% for pos in post %}
                         <div class="col">
                             <div class="post-card">
-                                <img src="{{pos.image.url}}" alt="Post Image" class="post-img">
+                                 {% if pos.video %}
+                                    <div class="video-container">
+                                        <video width="100%" controls>
+                                            <source src="{{ pos.video.url }}" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                        </video>
+                                    </div>
+                                {% elif pos.image %}
+                                    <img src="{{ pos.image.url }}" alt="Post Image" class="post-img">
+                                {% else %}
+                                    <div class="no-image">No Media Available</div>
+                                {% endif %}
                                 <div class="post-details text-center">
-                                   <h5><a href="/profile/{{pos.user}}">@{{pos.user}}</a></h5>
-                                    <p>{{pos.caption}}</p>
+                                      <h5><a href="/profile/{{ pos.user }}">@{{ pos.user }}</a></h5>
+                                    <p>{{ pos.caption }}</p>
                                 </div>
                             </div>
                         </div>

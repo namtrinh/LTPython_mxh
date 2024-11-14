@@ -156,9 +156,11 @@ def upload(request):
         user = request.user.username
         image = request.FILES.get('image_upload')
         caption = request.POST['caption']
+        video = request.FILES.get('video_upload')
 
-        new_post = Post.objects.create(user=user, image=image, caption=caption)
-        new_post.save()
+        if image or video:
+            new_post = Post.objects.create(user=user, image=image, video=video, caption=caption)
+            new_post.save()
 
         return redirect('/')
     else:
@@ -220,7 +222,7 @@ def explore(request):
 
 @login_required(login_url='/loginn')
 def profile(request, id_user):
-    """ user_object = get_object_or_404(CustomUser, username=id_user)
+    user_object = get_object_or_404(CustomUser, username=id_user)
 
     # Kiểm tra xem người dùng hiện tại có bị chặn bởi người dùng đang xem hồ sơ không
     if Block.objects.filter(blocked=request.user, blocker=user_object).exists():
@@ -229,22 +231,30 @@ def profile(request, id_user):
     profile = Profile.objects.get(user=request.user)
     user_profile = Profile.objects.get(user=user_object)
     user_posts = Post.objects.filter(user=id_user).order_by('-created_at')
-    user_post_length = len(user_posts)
-
     follower = request.user.username
     user = id_user
+    post_saved_db = SavedPost.objects.filter(user=request.user)
+    user_post_length = len(user_posts)
+
+    follower = CustomUser.objects.get(username=request.user.username)
 
     # Kiểm tra nếu đã theo dõi hay chưa
-    if Followers.objects.filter(follower=follower, user=user).first():
+    if Follower.objects.filter(follower=follower, user=user_object).exists():
         follow_unfollow = 'Unfollow'
     else:
         follow_unfollow = 'Follow'
 
+    user_follower = Follower.objects.filter(user=user_object)  # Lấy tất cả người theo dõi
+    user_following = len(Followers.objects.filter(follower=id_user))
+
+    user_followers_count = user_follower.count()  # Số lượng người theo dõi
+    user_following_count = Follower.objects.filter(
+        follower=user_object).count()  # Số lượng người mà người dùng này đang theo dõi
+
     # Kiểm tra nếu đã chặn hay chưa
     is_blocked = Block.objects.filter(blocker=request.user, blocked=user_object).exists()
 
-    user_followers = len(Followers.objects.filter(user=id_user))
-    user_following = len(Followers.objects.filter(follower=id_user))
+
 
     context = {
         'user_object': user_object,
@@ -253,9 +263,13 @@ def profile(request, id_user):
         'user_post_length': user_post_length,
         'profile': profile,
         'follow_unfollow': follow_unfollow,
-        'is_blocked': is_blocked,  # Thêm biến này vào context
-        'user_followers': user_followers,
+        'user_followers': user_follower,  # Truyền danh sách followers vào context
         'user_following': user_following,
+        'user_followers_count': user_followers_count,
+        'user_following_count': user_following_count,
+        'profile_id': profile.user.id,
+        'post_saved_db': post_saved_db,
+        'is_blocked': is_blocked
     }
 
     if request.user.username == id_user:
@@ -281,8 +295,11 @@ def profile(request, id_user):
 
             return redirect('/profile/' + id_user)
 
-    return render(request, 'profile.html', context) """
+    return render(request, 'profile.html', context)
 
+"""
+
+def profile(request, id_user):
     try:
         user_object = CustomUser.objects.get(username=id_user)
         profile = Profile.objects.get(user=user_object)
@@ -343,12 +360,13 @@ def profile(request, id_user):
         print(ex)
         return HttpResponse("Lỗi rồi")
 
+"""
+
 @login_required(login_url='/loginn')
 def delete(request, id):
     post = Post.objects.get(id=id)
     post.delete()
 
-    return redirect('/profile/'+ request.user.username)
 
 
 @login_required(login_url='/loginn')
@@ -453,10 +471,10 @@ def block_user(request, user_id):
         print(user_id)
 
         # Hủy theo dõi từ phía người chặn
-        Followers.objects.filter(follower=request.user.username, user=user_to_block.username).delete()
+        Follower.objects.filter(follower=request.user.id, user=user_to_block.id).delete()
 
         # Hủy theo dõi từ phía người bị chặn (nếu có)
-        Followers.objects.filter(follower=user_to_block.username, user=request.user.username).delete()
+        Follower.objects.filter(follower=user_to_block.id, user=request.user.id).delete()
 
         # Chặn người dùng
         block_instance, created = Block.objects.get_or_create(blocker=request.user, blocked=user_to_block)
@@ -514,3 +532,20 @@ def save_post(request, post_id):
         return redirect('/')
 
     return redirect('/')
+
+@login_required(login_url='/loginn')
+def like_list(request, post_id):
+    post = Post.objects.get(id=post_id)
+    liked_users = LikePost.objects.filter(post_id=post.id)
+
+    # Lấy thông tin người dùng đã thích bài viết
+    liked_user_profiles = []
+    for like in liked_users:
+        user = CustomUser.objects.get(username=like.username)  # Lấy đối tượng người dùng
+        profile = Profile.objects.get(user=user)  # Lấy profile của người dùng
+        liked_user_profiles.append({
+            'username': user.username,
+            'profile_img': profile.profileimg.url if profile.profileimg else '/static/default_avatar.jpg'  # Đảm bảo có ảnh mặc định
+        })
+
+    return render(request, 'like_list.html', {'post': post, 'liked_user_profiles': liked_user_profiles})

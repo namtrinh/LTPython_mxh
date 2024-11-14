@@ -28,4 +28,8 @@ urlpatterns = [
     path('report_post/<uuid:post_id>/', views.report_post, name='report_post'),
 path('save_post/<uuid:post_id>/', views.save_post, name='save_post'),
 
-]
+ path('like/<int:id>/', views.likes, name='likes'),
+    path('like-list/<uuid:post_id>/', views.like_list, name='like_list'),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+

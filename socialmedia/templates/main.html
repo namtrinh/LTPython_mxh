@@ -236,14 +236,24 @@
                                         this.submit();
                                     });
                                 </script>
-                            
+
                                 <div class="post-content">
                                     <h5><a href="/profile/{{ pos.user }}">@{{ pos.user }}</a></h5>
                                     <p>{{ pos.caption }}</p>
                                     <p class="text-muted">{{ pos.created_at }}</p>
                                     <a href="{% url 'save_post' pos.id %}">Save Post</a>
                                 </div>
-                                <img src="{{ pos.image.url }}" alt="Post Image" class="post-image">
+                                {% if pos.image %}
+                                    <img src="{{ pos.image.url }}" alt="Post Image" class="post-image">
+                                {% elif pos.video %}
+                                    <video controls class="post-video"
+                                           style="width: 100%; height: auto; max-width: 100%; border-radius: 10px;">
+                                        <source src="{{ pos.video.url }}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                {% endif %}
+
+
                                 <div class="post-content">
 
                                     <hr>
@@ -260,13 +270,13 @@
                                                   id="comment-count-{{ pos.id }}">{{ pos.comments.count }}</span>
                                         </a>
                                         <div>
-                                            {% if pos.no_of_likes == 0 %}
-                                                <p>0 Likes</p>
-                                            {% elif pos.no_of_likes == 1 %}
-                                                <p>1 Like</p>
-                                            {% else %}
-                                                <p>{{ pos.no_of_likes }} Likes</p>
-                                            {% endif %}
+                                              {% if pos.no_of_likes == 0 %}
+                                             
+                                                {% elif pos.no_of_likes == 1 %}
+                                                <p><a href="{% url 'like_list' pos.id %}">1 Like</a></p>
+                                                {% else %}
+                                                <p><a href="{% url 'like_list' pos.id %}">{{ pos.no_of_likes }} Likes</a></p>
+                                                {% endif %}
                                         </div>
                                     </div>
                                     <div id="comment-section-{{ pos.id }}" class="comment-section mt-3"
