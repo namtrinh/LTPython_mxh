@@ -21,7 +21,7 @@
 
         .container {
             max-width: 1000px;
-          
+
         }
 
         .sidebar {
@@ -222,16 +222,20 @@
                                 <!-- Three dots button -->
 
                                 <!-- Report -->
-                                <div class="post-options">
-                                    <!-- Report option -->
-                                    <form method="POST" action="{% url 'report_post' pos.id %}"
-                                          id="reportForm{{ pos.id }}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-link">
-                                            <i class="fa fa-ellipsis-v"></i> Report
-                                        </button>
-                                    </form>
-                                </div>
+                            {% if pos.user != user.username %}
+    <div class="post-options">
+        <!-- Report option -->
+        <form method="POST" action="{% url 'report_post' pos.id %}" id="reportForm{{ pos.id }}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm"
+                    style="border-radius: 5px; display: flex; align-items: center;">
+                <i class="fa fa-flag" style="margin-right: 5px;"></i> Report
+            </button>
+        </form>
+    </div>
+{% endif %}
+
+
 
                                 <!-- JavaScript to show an alert on report -->
                                 <script type="text/javascript">

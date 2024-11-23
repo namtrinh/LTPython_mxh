@@ -1,23 +1,16 @@
 import uuid
-from itertools import chain
 
 from django.contrib import messages
 from django.core.cache import cache
 from django.core.mail import send_mail
 from  django . shortcuts  import  get_object_or_404, render, redirect
-from django.http import HttpResponse, JsonResponse
-from django.contrib.auth.models import User
+from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from .models import Comment, Block, SavedPost
 from django.utils import timezone
-
-from .models import Follower, Followers, LikePost, Post, Profile, CustomUser
-from django.db.models import Q
-
-from django.contrib.auth.models import User
-
+from .models import Follower, LikePost,  CustomUser
 
 def signup(request):
     try:
@@ -35,9 +28,8 @@ def signup(request):
                 invalid = "Username đã tồn tại."
                 return render(request, 'signup.html', {'invalid': invalid})
 
-            # Tạo token xác minh
-            activation_token = str(uuid.uuid4())
 
+            activation_token = str(uuid.uuid4())
             # Kiểm tra số lần gửi email cho tài khoản này
             email_send_count_key = f"email_send_count_{emailid}"
             email_send_count = cache.get(email_send_count_key, 0)
@@ -46,16 +38,10 @@ def signup(request):
                 invalid = "Bạn đã gửi yêu cầu xác thực quá số lần cho phép trong 10 phút."
                 return render(request, 'signup.html', {'invalid': invalid})
 
-            # Lưu thông tin tài khoản vào cache với thời gian timeout là 2 phút cho token
             cache.set(activation_token, {'fnm': fnm, 'emailid': emailid, 'pwd': pwd}, timeout=120)
-
-            # Cập nhật bộ đếm số lần gửi email cho tài khoản trong 10 phút
             cache.set(email_send_count_key, email_send_count + 1, timeout=600)
-
-            # Tạo đường dẫn xác minh
             activation_link = request.build_absolute_uri(reverse('activate', args=[activation_token]))
 
-            # Gửi email xác thực
             send_mail(
                 'Xác thực tài khoản của bạn',
                 f'Nhấn vào link sau để kích hoạt tài khoản của bạn: {activation_link}',
@@ -75,33 +61,28 @@ def signup(request):
 
 
 def activate_account(request, token):
-    # Lấy thông tin tài khoản từ cache
-    account_data = cache.get(token)
 
+    account_data = cache.get(token)
     if account_data:
         fnm = account_data['fnm']
         emailid = account_data['emailid']
         pwd = account_data['pwd']
-
         my_user = CustomUser(email=emailid, username=fnm)
         my_user.set_password(pwd)
         my_user.save()
-
-        # Tạo hồ sơ người dùng và đánh dấu là đã kích hoạt
         new_profile = Profile.objects.create(user=my_user, activation_token=token, is_active=True)
         new_profile.save()
         cache.delete(token)
-
         return render(request, 'activation_success.html')  # Giao diện thông báo kích hoạt thành công
     else:
         return render(request, 'activation_error.html', {'message': "Liên kết xác thực không hợp lệ hoặc đã hết hạn."})
+
 def loginn(request):
     if request.method == 'POST':
         emailid = request.POST.get('emailid')
         pwd = request.POST.get('pwd')
         print(emailid, pwd)
         userr = authenticate(request, email=emailid, password=pwd)  # Thay đổi đây
-
         if userr is not None:
             login(request, userr)
             return redirect('/')
@@ -466,19 +447,16 @@ def following_list(request, id_user):
 
 
 def block_user(request, user_id):
+
     if request.method == 'POST':
         user_to_block = get_object_or_404(CustomUser, id=user_id)
         print(user_id)
-
         # Hủy theo dõi từ phía người chặn
         Follower.objects.filter(follower=request.user.id, user=user_to_block.id).delete()
-
         # Hủy theo dõi từ phía người bị chặn (nếu có)
         Follower.objects.filter(follower=user_to_block.id, user=request.user.id).delete()
-
         # Chặn người dùng
         block_instance, created = Block.objects.get_or_create(blocker=request.user, blocked=user_to_block)
-
         if created:
             # Người dùng đã được chặn thành công
             return redirect('profile', id_user=user_to_block.username)
