@@ -14,8 +14,6 @@ admin.site.register(Profile)
 
 admin.site.register(CustomUser)
 
-
-
 class PostAdmin(admin.ModelAdmin):
     list_display = ('user', 'caption', 'created_at', 'no_of_reports', 'no_of_likes')
     list_filter = ('no_of_reports',)

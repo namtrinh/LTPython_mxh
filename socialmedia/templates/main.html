@@ -16,7 +16,12 @@
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #FFF0F5;
+            background-color: whitesmoke;
+        }
+
+        .container {
+            max-width: 1000px;
+          
         }
 
         .sidebar {
@@ -100,7 +105,7 @@
 
         /* Sidebar */
         .sidebar {
-            background-color: #343a40;
+            background-color: #ffffff;
             height: 100vh;
             padding-top: 20px;
         }
@@ -119,12 +124,16 @@
         }
 
         .sidebar a {
-            color: white;
+            color: #3c3a3a;
             font-weight: bold;
         }
 
         .sidebar a:hover {
             color: #007bff;
+        }
+
+        .post {
+            max-height: 500px;
         }
 
 
@@ -243,15 +252,18 @@
                                     <p class="text-muted">{{ pos.created_at }}</p>
                                     <a href="{% url 'save_post' pos.id %}">Save Post</a>
                                 </div>
-                                {% if pos.image %}
-                                    <img src="{{ pos.image.url }}" alt="Post Image" class="post-image">
-                                {% elif pos.video %}
-                                    <video controls class="post-video"
-                                           style="width: 100%; height: auto; max-width: 100%; border-radius: 10px;">
-                                        <source src="{{ pos.video.url }}" type="video/mp4">
-                                        Your browser does not support the video tag.
-                                    </video>
-                                {% endif %}
+                                <div class="post" style="display: flex; justify-content: center; align-items: center;">
+                                    {% if pos.image %}
+                                        <img src="{{ pos.image.url }}" alt="Post Image" class="post-image"
+                                             style="width: auto; height: auto; max-width: 600px; max-height: 450px; border-radius: 10px;">
+                                    {% elif pos.video %}
+                                        <video controls class="post-video"
+                                               style="width: auto; height: auto; max-width: 600px; max-height: 450px; border-radius: 10px;">
+                                            <source src="{{ pos.video.url }}" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                        </video>
+                                    {% endif %}
+                                </div>
 
 
                                 <div class="post-content">
@@ -270,13 +282,14 @@
                                                   id="comment-count-{{ pos.id }}">{{ pos.comments.count }}</span>
                                         </a>
                                         <div>
-                                              {% if pos.no_of_likes == 0 %}
-                                             
-                                                {% elif pos.no_of_likes == 1 %}
+                                            {% if pos.no_of_likes == 0 %}
+
+                                            {% elif pos.no_of_likes == 1 %}
                                                 <p><a href="{% url 'like_list' pos.id %}">1 Like</a></p>
-                                                {% else %}
-                                                <p><a href="{% url 'like_list' pos.id %}">{{ pos.no_of_likes }} Likes</a></p>
-                                                {% endif %}
+                                            {% else %}
+                                                <p><a href="{% url 'like_list' pos.id %}">{{ pos.no_of_likes }}
+                                                    Likes</a></p>
+                                            {% endif %}
                                         </div>
                                     </div>
                                     <div id="comment-section-{{ pos.id }}" class="comment-section mt-3"
