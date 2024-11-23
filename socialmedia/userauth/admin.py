@@ -6,13 +6,12 @@ from django.core.mail import send_mail
 from django.contrib.admin.models import LogEntry, CHANGE
 from django.db import transaction
 
+from socialmedia import settings
 # Register your models here.
 
 from .models import *
 
 admin.site.register(Profile)
-
-admin.site.register(CustomUser)
 
 class PostAdmin(admin.ModelAdmin):
     list_display = ('user', 'caption', 'created_at', 'no_of_reports', 'no_of_likes')
@@ -52,3 +51,58 @@ class PostAdmin(admin.ModelAdmin):
             pass
 
 admin.site.register(Post, PostAdmin)
+
+
+from django.core.mail import send_mail
+from django.contrib import admin
+from .models import CustomUser
+
+class CustomUserAdmin(admin.ModelAdmin):
+
+    def save_model(self, request, obj, form, change):
+        # Kiểm tra nếu thuộc tính is_active đã thay đổi
+        if change and 'is_active' in form.changed_data:
+            # Gửi email nếu trạng thái is_active thay đổi
+            if obj.is_active:
+                subject = 'Tài khoản của bạn đã được kích hoạt'
+                message = f'Chào {obj.username},\n\nTài khoản của bạn đã được kích hoạt và bạn có thể đăng nhập vào hệ thống.'
+            else:
+                subject = 'Thông báo tài khoản đã bị khóa'
+                message = f'Chào {obj.username},\n\nTài khoản của bạn đã bị khóa và bạn không thể đăng nhập vào hệ thống. Nếu bạn có thắc mắc, vui lòng liên hệ với chúng tôi.'
+
+            recipient_email = obj.email
+            if recipient_email:
+                try:
+                    send_mail(
+                        subject,
+                        message,
+                        'cunnconn01@gmail.com',  # Thay bằng email của bạn
+                        [recipient_email],  # Gửi email tới người dùng
+                        fail_silently=False,
+                    )
+                except Exception as e:
+                    print(f"Error sending email: {e}")
+
+        # Lưu lại thay đổi
+        super().save_model(request, obj, form, change)
+
+
+    def delete_model(self, request, obj):
+        # Lấy email của người dùng
+        recipient_email = obj.email
+        print(recipient_email)
+        if recipient_email:
+            try:
+                send_mail(
+                    'Thông báo tài khoản đã bị xóa',
+                    f'Chào {obj.username},\n\nTài khoản của bạn đã bị xóa khỏi hệ thống.\n\nNếu bạn có thắc mắc, vui lòng liên hệ với chúng tôi.',
+                    'cunnconn01@gmail.com',
+                    [recipient_email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                print(f"Error sending email: {e}")
+
+        super().delete_model(request, obj)
+
+admin.site.register(CustomUser, CustomUserAdmin)
